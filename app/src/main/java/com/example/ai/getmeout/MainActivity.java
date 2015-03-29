@@ -94,6 +94,8 @@ public class MainActivity extends ActionBarActivity
         mRecorder.start();
     }
 
+    private boolean audioRecording = false;
+
     private final int KEY_BUTTON = 0;
     private final int KEY_VIBRATE = 1;
     private final int MIDDLE_BUTTON = 1;
@@ -171,16 +173,13 @@ public class MainActivity extends ActionBarActivity
 //                                Toast.makeText(MainActivity.this, "TOP Button", Toast.LENGTH_SHORT).show();
                                 final Toast toast = Toast.makeText(MainActivity.this, "Top Button", Toast.LENGTH_SHORT);
                                 toast.show();
-
-                                startRecording();
-                                final Handler handler2 = new Handler();
-                                handler2.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        stopRecording();
-                                        startPlaying();
-                                    }
-                                }, 2000);
+                                if (!audioRecording) {
+                                    startRecording();
+                                } else {
+                                    stopRecording();
+                                    startPlaying();
+                                }
+                                audioRecording = !audioRecording;
                             }else if (button == BOTTOM_BUTTON) {
 //                                Toast.makeText(MainActivity.this, "BOTTOM Button", Toast.LENGTH_SHORT).show();
                                 final Toast toast = Toast.makeText(MainActivity.this, "BOTTOM Button", Toast.LENGTH_SHORT);
@@ -196,7 +195,7 @@ public class MainActivity extends ActionBarActivity
                             }else{
                                 //Toast.makeText(MainActivity.this, "Ay! Don't Touch Me Bitch!", Toast.LENGTH_SHORT).show();
 
-                                    final Toast toast = Toast.makeText(MainActivity.this, "Ay! Don't Touch Me Bitch!", Toast.LENGTH_SHORT);
+                                    final Toast toast = Toast.makeText(MainActivity.this, "Ay! Wrong button!", Toast.LENGTH_SHORT);
                                     toast.show();
 
                                     Handler handler = new Handler();

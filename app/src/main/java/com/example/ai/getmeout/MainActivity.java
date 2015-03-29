@@ -1,6 +1,7 @@
 package com.example.ai.getmeout;
 
 import android.app.Activity;
+import android.app.Application;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -30,6 +31,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -62,20 +64,57 @@ public class MainActivity extends ActionBarActivity
     }
 
     private void stopPlaying() {
-        mPlayer.release();
+        mPlayer.stop();     // stop recording
+        mPlayer.reset();    // set state to idle
+        mPlayer.release();  // release resources back to the system
         mPlayer = null;
     }
 
     private void stopRecording() {
         Log.v("prince", "stoped recording");
         mRecorder.stop();
+        mRecorder.reset();
         mRecorder.release();
         mRecorder = null;
     }
 
     private void startRecording() {
-        mFileName = getFilesDir().getAbsolutePath();
-        mFileName += "/audiorecordtest.3gp";
+
+        String directoryString = getFilesDir().getAbsolutePath();
+        Log.v("prince",  "***********: " + directoryString);
+        directoryString += "/GetMeOut";
+
+
+
+        Log.v("prince", "check if directory exists");
+//        if (!directoryFile.exists()) {
+//            Log.v("prince", "directory exists");
+//            directoryFile.mkdirs();
+//        }
+        File directoryFile = new File(
+                android.os.Environment.getExternalStorageDirectory()
+                        + File.separator
+                        + "Android"
+                        + File.separator
+                        + "data"
+                        + File.separator
+                        + getApplication().getPackageName()
+                        + File.separator + "GetMeOutf");
+        directoryFile.mkdirs();
+//        directoryFile.setReadable(true);
+//        directoryFile.setWritable(true);
+        Log.v("prince", "directory should exist: " + directoryFile.toString());
+        Log.v("prince", "directory should exist: " + directoryFile.getAbsolutePath());
+        mFileName = new File(
+                android.os.Environment.getExternalStorageDirectory()
+                        + File.separator
+                        + "Android"
+                        + File.separator
+                        + "data"
+                        + File.separator
+                        + getApplication().getPackageName()
+                        + File.separator + "GetMeOutf"
+                        + File.separator + "file.3gp").getAbsolutePath();
 
         Log.v("prince", mFileName);
 
@@ -121,7 +160,21 @@ public class MainActivity extends ActionBarActivity
         mTitle = getTitle();
                //checkconnection
 
-        Button newButton = (Button) findViewById(R.id.checkconnection);
+//        Button newButton = (Button) findViewById(R.id.checkconnection);
+//        Button playBtn = (Button) mNavigationDrawerFragment.getActivity().findViewById(R.id.playBtn);
+//        playBtn.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v) {
+//                startPlaying();
+//            }
+//        });
+//        Button stopBtn = (Button) mNavigationDrawerFragment.getActivity().findViewById(R.id.stopBtn);
+//        stopBtn.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v) {
+//                stopPlaying();
+//            }
+//        });
 //        newButton.setOnClickListener(
 //                new View.OnClickListener()
 //                {
@@ -144,7 +197,7 @@ public class MainActivity extends ActionBarActivity
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-        mGoogleApiClient.connect();
+        Log.v("prince", "new dir");
     }
 
 
@@ -168,6 +221,7 @@ public class MainActivity extends ActionBarActivity
                                         toast.cancel();
                                     }
                                 }, 500);
+                                mGoogleApiClient.connect();
                             }else if (button == TOP_BUTTON) {
 
 //                                Toast.makeText(MainActivity.this, "TOP Button", Toast.LENGTH_SHORT).show();
@@ -177,7 +231,6 @@ public class MainActivity extends ActionBarActivity
                                     startRecording();
                                 } else {
                                     stopRecording();
-                                    startPlaying();
                                 }
                                 audioRecording = !audioRecording;
                             }else if (button == BOTTOM_BUTTON) {
@@ -192,6 +245,7 @@ public class MainActivity extends ActionBarActivity
                                         toast.cancel();
                                     }
                                 }, 500);
+                                startPlaying();
                             }else{
                                 //Toast.makeText(MainActivity.this, "Ay! Don't Touch Me Bitch!", Toast.LENGTH_SHORT).show();
 

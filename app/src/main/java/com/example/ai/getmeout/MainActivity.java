@@ -1,26 +1,23 @@
 package com.example.ai.getmeout;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getpebble.android.kit.PebbleKit;
@@ -37,15 +34,62 @@ public class MainActivity extends ActionBarActivity
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
+    private static final String LOG_TAG = "AudioRecordTest";
+
+    private static String mFileName = null;
+    private MediaRecorder mRecorder = null;
+    private MediaPlayer mPlayer = null;
+
+    private void startPlaying() {
+        Log.v("prince", "begin playig");
+        mPlayer = new MediaPlayer();
+        try {
+            mPlayer.setDataSource(mFileName);
+            mPlayer.prepare();
+            mPlayer.start();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+    }
+
+    private void stopPlaying() {
+        mPlayer.release();
+        mPlayer = null;
+    }
+
+    private void stopRecording() {
+        Log.v("prince", "stoped recording");
+        mRecorder.stop();
+        mRecorder.release();
+        mRecorder = null;
+    }
+
+    private void startRecording() {
+        mFileName = getFilesDir().getAbsolutePath();
+        mFileName += "/audiorecordtest.3gp";
+
+        Log.v("prince", mFileName);
+
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setOutputFile(mFileName);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+
+        mRecorder.start();
+    }
+
     private final int KEY_BUTTON = 0;
     private final int KEY_VIBRATE = 1;
     private final int MIDDLE_BUTTON = 1;
     private final int TOP_BUTTON = 0;
     private final int BOTTOM_BUTTON = 2;
-
-    private static String mFileName = null;
-
-    private MediaRecorder mRecorder = null;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -101,13 +145,15 @@ public class MainActivity extends ActionBarActivity
                                 final Toast toast = Toast.makeText(MainActivity.this, "Top Button", Toast.LENGTH_SHORT);
                                 toast.show();
 
-                                Handler handler = new Handler();
-                                handler.postDelayed(new Runnable() {
+                                startRecording();
+                                final Handler handler2 = new Handler();
+                                handler2.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        toast.cancel();
+                                        stopRecording();
+                                        startPlaying();
                                     }
-                                }, 500);
+                                }, 2000);
                             }else if (button == BOTTOM_BUTTON) {
 //                                Toast.makeText(MainActivity.this, "BOTTOM Button", Toast.LENGTH_SHORT).show();
                                 final Toast toast = Toast.makeText(MainActivity.this, "BOTTOM Button", Toast.LENGTH_SHORT);

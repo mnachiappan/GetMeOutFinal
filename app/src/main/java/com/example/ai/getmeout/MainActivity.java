@@ -1,6 +1,7 @@
 package com.example.ai.getmeout;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.getpebble.android.kit.PebbleKit;
@@ -95,7 +97,7 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
-    private static final UUID WATCHAPP_UUID = UUID.fromString("5fac4dcb-2b03-49c8-a91e-4bf67348572e");
+    private static final UUID WATCHAPP_UUID = UUID.fromString("05ba28d1-14b9-4b09-a5a3-bf4c622d24e0");
 
     private Handler handler = new Handler();
     @Override
@@ -106,17 +108,28 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         mTitle = getTitle();
-                if(PebbleKit.isWatchConnected(getApplicationContext())){
-                    Toast.makeText(MainActivity.this,"Pebble connected!",Toast.LENGTH_LONG).show();
-                }else{
-                    Toast.makeText(MainActivity.this,"Pebble not connected! \n Please Connect",Toast.LENGTH_SHORT).show();
-                }
+               //checkconnection
+
+        Button newButton = (Button) findViewById(R.id.checkconnection);
+//        newButton.setOnClickListener(
+//                new View.OnClickListener()
+//                {
+//                    public void onClick(View v) {
+//                        if(PebbleKit.isWatchConnected(getApplicationContext())){
+//                            Toast.makeText(MainActivity.this,"Pebble connected!",Toast.LENGTH_LONG).show();
+//                        }else{
+//                            Toast.makeText(MainActivity.this,"Pebble not connected! \n Please Connect",Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
 
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+
+                // Set up the drawer.
+                mNavigationDrawerFragment.setUp(
+                        R.id.navigation_drawer,
+                        (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
 
@@ -141,6 +154,7 @@ public class MainActivity extends ActionBarActivity
                                     }
                                 }, 500);
                             }else if (button == TOP_BUTTON) {
+
 //                                Toast.makeText(MainActivity.this, "TOP Button", Toast.LENGTH_SHORT).show();
                                 final Toast toast = Toast.makeText(MainActivity.this, "Top Button", Toast.LENGTH_SHORT);
                                 toast.show();
@@ -195,20 +209,23 @@ public class MainActivity extends ActionBarActivity
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, PlaceholderFragment.newInstance(position))
                 .commit();
     }
 
     public void onSectionAttached(int number) {
         switch (number) {
-            case 1:
+            case 0:
                 mTitle = getString(R.string.title_section1);
                 break;
-            case 2:
+            case 1:
                 mTitle = getString(R.string.title_section2);
                 break;
-            case 3:
+            case 2:
                 mTitle = getString(R.string.title_section3);
+                break;
+            case 3:
+                mTitle = getString(R.string.title_section4);
                 break;
         }
     }
@@ -278,6 +295,20 @@ public class MainActivity extends ActionBarActivity
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+            Button btn = (Button) rootView.findViewById(R.id.checkconnection);
+            btn.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    if(PebbleKit.isWatchConnected(getActivity())){
+                            Toast.makeText(getActivity(),"Pebble connected!",Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(getActivity(),"Pebble not connected! \n Please Connect",Toast.LENGTH_SHORT).show();
+                        }
+                }
+
+            });
             return rootView;
         }
 

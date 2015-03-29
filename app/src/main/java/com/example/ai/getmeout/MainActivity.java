@@ -1,9 +1,11 @@
 package com.example.ai.getmeout;
 
 import android.app.Activity;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -11,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,12 +25,17 @@ import android.widget.Toast;
 
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -97,6 +105,8 @@ public class MainActivity extends ActionBarActivity
     private CharSequence mTitle;
     private static final UUID WATCHAPP_UUID = UUID.fromString("5fac4dcb-2b03-49c8-a91e-4bf67348572e");
 
+    GoogleApiClient mGoogleApiClient;
+
     private Handler handler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +127,13 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
 
@@ -247,6 +264,36 @@ public class MainActivity extends ActionBarActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        Geocoder geocoder;
+        List<Address> addresses;
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
+            String address = addresses.get(0).getAddressLine(0);
+            String city = addresses.get(0).getAddressLine(1);
+            String country = addresses.get(0).getAddressLine(2);
+
+            SmsManager sms = SmsManager.getDefault();
+            sms.sendTextMessage("6479498615", null, address + ", " + city + ", " + country, null, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i("prince", "Location services suspended.");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.i("prince", "Location services failed.");
     }
 
     /**
